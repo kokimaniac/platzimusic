@@ -1,38 +1,56 @@
 <template lang="pug">
 #app
-  img(src='./assets/logo.png')
-  h1 {{ msg }}
-  i {{ nsg }}
-  h2 Essential Links
+  img(src='./assets/music_logo.png')
+  h1 Platzimusic
+  select(v-model="selectedCountry")
+    option(v-for="country in countries" v-bind:value="country.value") {{ country.name }}
+  spinner(v-show="loading")
   ul
-    li
-      a(href='https://vuejs.org', target='_blank') Core Docs
-    li
-      a(href='https://forum.vuejs.org', target='_blank') Forum
-    li
-      a(href='https://chat.vuejs.org', target='_blank') Community Chat
-    li
-      a(href='https://twitter.com/vuejs', target='_blank') Twitter
-  h2 Ecosystem
-  ul
-    li
-      a(href='http://router.vuejs.org/', target='_blank') vue-router
-    li
-      a(href='http://vuex.vuejs.org/', target='_blank') vuex
-    li
-      a(href='http://vue-loader.vuejs.org/', target='_blank') vue-loader
-    li
-      a(href='https://github.com/vuejs/awesome-vue', target='_blank') awesome-vue
+    artist(v-for="artist in artists" v-bind:artist="artist" v-bind:key="artist.mbid")
 
 </template>
 
 <script>
+import Artist from './components/Artist'
+import Spinner from './components/Spinner'
+import getArtists from './api'
+
 export default {
   name: 'app',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App',
-      nsg: 'What the fuck with stylus?'
+      artists: [],
+      countries: [
+        { name: 'Argentina', value: 'argentina'},
+        { name: 'Bolivia', value: 'bolivia'},
+        { name: 'Chile', value: 'chile'},
+        { name: 'EEUU', value: 'united states'},
+        { name: 'England', value: 'united kingdom'}
+      ],
+      selectedCountry: 'argentina',
+      loading: true
+    }
+  },
+  components: {
+    Artist, Spinner
+  },
+  methods: {
+    refreshArtists (){
+      const self = this
+      this.loading = true
+      getArtists(this.selectedCountry)
+        .then(function(artists){
+          self.loading=false
+          self.artists = artists
+        })
+    }
+  },
+  mounted (){
+    this.refreshArtists()
+  },
+  watch: {
+    selectedCountry(){
+      this.refreshArtists()
     }
   }
 }
@@ -44,7 +62,7 @@ export default {
   -webkit-font-smoothing antialiased
   -moz-osx-font-smoothing grayscale
   text-align center
-  color red !important
+  color gray
   margin-top 60px
 
 h1, h2
